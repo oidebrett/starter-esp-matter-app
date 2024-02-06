@@ -11,6 +11,11 @@
 #include <esp_err.h>
 #include <esp_matter.h>
 
+//start of changes for onoff light
+#include <driver/gpio.h>
+#define LED        ((gpio_num_t) 2)
+//end of changes for onoff light
+
 #if CHIP_DEVICE_CONFIG_ENABLE_THREAD
 #include "esp_openthread_types.h"
 #endif

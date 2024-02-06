@@ -134,7 +134,9 @@ static esp_err_t app_attribute_update_cb(attribute::callback_type_t type, uint16
     esp_err_t err = ESP_OK;
 
     if (type == PRE_UPDATE) {
-        /* Do stuff here */
+        /* Driver update */
+        app_driver_handle_t driver_handle = (app_driver_handle_t)priv_data;
+        err = app_driver_attribute_update(driver_handle, endpoint_id, cluster_id, attribute_id, val);
     }
 
     return err;
@@ -148,14 +150,26 @@ extern "C" void app_main()
     nvs_flash_init();
 
     /* Initialize driver */
+    app_driver_handle_t light_handle = app_driver_light_init();
 
     /* Create a Matter node and add the mandatory Root Node device type on endpoint 0 */
+    node::config_t node_config;
+    node_t *node = node::create(&node_config, app_attribute_update_cb, app_identification_cb);
+
+    on_off_light::config_t light_config;
+    light_config.on_off.on_off = DEFAULT_POWER;
+    light_config.on_off.lighting.start_up_on_off = nullptr;
+    endpoint_t *endpoint = on_off_light::create(node, &light_config, ENDPOINT_FLAG_NONE, light_handle);
 
     /* Confirm that node and endpoint were created successfully */
+    if (!node || !endpoint) {
+        ESP_LOGE(TAG, "Matter node creation failed");
+    }
 
     /* Get Endpoint Id */
+    light_endpoint_id = endpoint::get_id(endpoint);
 
-    ESP_LOGI(TAG, "Matter App created with endpoint_id");
+    ESP_LOGI(TAG, "Light created with endpoint_id %d", light_endpoint_id);
 
 #if CHIP_DEVICE_CONFIG_ENABLE_THREAD
     /* Set OpenThread platform config */
@@ -174,6 +188,7 @@ extern "C" void app_main()
     }
 
     /* Starting driver with default values */
+    app_driver_light_set_defaults(light_endpoint_id);
 
 #if CONFIG_ENABLE_ENCRYPTED_OTA
     err = esp_matter_ota_requestor_encrypted_init(s_decryption_key, s_decryption_key_len);

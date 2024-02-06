@@ -134,7 +134,7 @@ static esp_err_t app_attribute_update_cb(attribute::callback_type_t type, uint16
     esp_err_t err = ESP_OK;
 
     if (type == PRE_UPDATE) {
-        /* Doing stuff here */
+        /* Do stuff here */
     }
 
     return err;
@@ -155,7 +155,7 @@ extern "C" void app_main()
 
     /* Get Endpoint Id */
 
-    ESP_LOGI(TAG, "Matter App created with endpoint_id %d", light_endpoint_id);
+    ESP_LOGI(TAG, "Matter App created with endpoint_id");
 
 #if CHIP_DEVICE_CONFIG_ENABLE_THREAD
     /* Set OpenThread platform config */
